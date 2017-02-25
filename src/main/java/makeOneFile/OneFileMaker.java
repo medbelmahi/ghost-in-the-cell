@@ -9,8 +9,8 @@ import java.util.*;
  */
 public class OneFileMaker {
     
-    public static final String PLAYER_FILE_PATH = "C:\\Users\\MedBelmahi\\Desktop\\Dossier\\codingGame\\fantasticbits\\src\\main\\java\\playerFile\\Player.java";
-    public static final String PACKAGE_PATH = "C:\\Users\\MedBelmahi\\Desktop\\Dossier\\codingGame\\fantasticbits\\src\\main\\java\\fantasticbits";
+    public static final String PLAYER_FILE_PATH = "D:\\CodinGame\\ghost-in-the-cell\\src\\main\\java\\playerFile\\Player.java";
+    public static final String PACKAGE_PATH = "D:\\CodinGame\\ghost-in-the-cell\\src\\main\\java\\ghostinthecell";
     public static final int UPDATE_RANGE_IN_SECOND = 10; //seconds
     
     public static void main(final String[] args) {
