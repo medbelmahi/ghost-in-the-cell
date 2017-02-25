@@ -24,4 +24,14 @@ public class Factory extends Entity {
     public void addDistance(Factory secondFactory, int distance) {
         nextFactories.put(secondFactory, distance);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.id == ((Entity) obj).id;
+    }
+
+
+    public int necessaryCyborgs() {
+        return cyborgsCount;
+    }
 }

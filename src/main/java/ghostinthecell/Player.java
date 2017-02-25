@@ -41,12 +41,14 @@ public class Player {
                 gameBoard.updateEntityData(entityId, entityType, entityData);
             }
 
-            // Write an action using System.out.println()
+            gameBoard.processing();
+
+            // Write an doAction using System.out.println()
             // To debug: System.err.println("Debug messages...");
 
-
-            // Any valid action, such as "WAIT" or "MOVE source destination cyborgs"
-            System.out.println("WAIT");
+            String action = gameBoard.doAction();
+            // Any valid doAction, such as "WAIT" or "MOVE source destination cyborgs"
+            System.out.println(action);
         }
     }
 }
