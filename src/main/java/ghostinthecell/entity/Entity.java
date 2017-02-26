@@ -33,11 +33,16 @@ public abstract class Entity {
         return "";
     }
 
-    public boolean cyborgsMoreThenOrEqual(Entity entity) {
-        return this.cyborgsCount >= entity.cyborgsCount;
+    public boolean cyborgsMoreThen(Entity entity) {
+        return this.cyborgsCount > entity.cyborgsCount;
     }
 
     public int id() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.id == ((Entity) obj).id;
     }
 }

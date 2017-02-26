@@ -1,12 +1,13 @@
 package ghostinthecell;
 
+import ghostinthecell.actions.Action;
 import ghostinthecell.entity.Entity;
 import ghostinthecell.entity.Factory;
-import ghostinthecell.entity.actions.Action;
 import ghostinthecell.entity.maker.EntityData;
 import ghostinthecell.entity.maker.EntityFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,8 +47,6 @@ public class Board {
 
     public void updateEntityData(int entityId, String entityType, EntityData entityData) {
 
-        System.err.println("entity id : " + entityId);
-
         Entity entity = entities.get(entityId);
         if (entity == null) {
             entity = EntityFactory.constract(entityType, entityId);
@@ -57,9 +56,14 @@ public class Board {
 
     public String doAction() {
 
-        Action action = me.makeAction();
+        List<Action> actions = me.makeActions();
 
-        return action.writeAction();
+        String actionsOutput = "";
+        for (Action action : actions) {
+            actionsOutput += action.writeAction() + ";";
+        }
+
+        return actionsOutput + "MSG Amiral";
     }
 
     public void processing() {

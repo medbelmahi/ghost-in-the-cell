@@ -1,4 +1,4 @@
-package ghostinthecell.entity.actions;
+package ghostinthecell.actions;
 
 import ghostinthecell.entity.Factory;
 
@@ -8,19 +8,19 @@ import ghostinthecell.entity.Factory;
 public class Move extends Action {
 
     public static final String SPACE = " ";
-    int source;
-    int destination;
+    Factory source;
+    Factory destination;
     int cyborgCount;
 
     public Move(Factory myFactory, Factory neutralFactory, int i) {
         super("MOVE");
-        this.source = myFactory.id();
-        this.destination = neutralFactory.id();
+        this.source = myFactory;
+        this.destination = neutralFactory;
         this.cyborgCount = i;
     }
 
     @Override
     public String writeAction() {
-        return super.writeAction() + SPACE + this.source + SPACE + this.destination + SPACE + this.cyborgCount;
+        return super.writeAction() + SPACE + this.source.id() + SPACE + this.destination.id() + SPACE + this.cyborgCount;
     }
 }

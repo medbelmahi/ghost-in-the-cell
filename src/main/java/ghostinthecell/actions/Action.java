@@ -1,4 +1,4 @@
-package ghostinthecell.entity.actions;
+package ghostinthecell.actions;
 
 /**
  * Created by Mohamed BELMAHI on 25/02/2017.
