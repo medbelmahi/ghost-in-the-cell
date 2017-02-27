@@ -1,4 +1,4 @@
-package ghostinthecell.actions;
+package ghostinthecell.challenge.actions;
 
 import ghostinthecell.entity.Factory;
 
@@ -12,11 +12,11 @@ public class Move extends Action {
     Factory destination;
     int cyborgCount;
 
-    public Move(Factory myFactory, Factory neutralFactory, int i) {
+    public Move(Factory myFactory, Factory neutralFactory, int cyborgCount) {
         super("MOVE");
         this.source = myFactory;
         this.destination = neutralFactory;
-        this.cyborgCount = i;
+        this.cyborgCount = cyborgCount;
     }
 
     @Override

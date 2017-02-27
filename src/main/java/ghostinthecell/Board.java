@@ -1,6 +1,6 @@
 package ghostinthecell;
 
-import ghostinthecell.actions.Action;
+import ghostinthecell.challenge.actions.Action;
 import ghostinthecell.entity.Entity;
 import ghostinthecell.entity.Factory;
 import ghostinthecell.entity.maker.EntityData;
@@ -22,8 +22,11 @@ public class Board {
     Map<Integer, Entity> entities = new HashMap<>();
     Challenger me;
 
+    int turn;
+
     public Board() {
-        this.me = new Challenger(entities);
+        this.me = new Challenger(entities, this);
+        turn = 0;
     }
 
     public void writeDistance(int factory1, int factory2, int distance) {
@@ -68,5 +71,13 @@ public class Board {
 
     public void processing() {
         this.me.processing();
+    }
+
+    public void newTurn() {
+        this.turn++;
+    }
+
+    public boolean isDeadEntity(Entity entity) {
+        return entity.deadEntity(turn);
     }
 }

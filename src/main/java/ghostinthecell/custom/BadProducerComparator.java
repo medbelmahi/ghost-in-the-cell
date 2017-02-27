@@ -1,4 +1,6 @@
-package ghostinthecell.entity;
+package ghostinthecell.custom;
+
+import ghostinthecell.entity.Factory;
 
 import java.util.Comparator;
 

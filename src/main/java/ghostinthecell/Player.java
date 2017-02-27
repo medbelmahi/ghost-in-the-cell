@@ -28,6 +28,7 @@ public class Player {
         // game loop
         while (true) {
             int entityCount = in.nextInt(); // the number of entities (e.g. factories and troops)
+            gameBoard.newTurn();
             for (int i = 0; i < entityCount; i++) {
                 int entityId = in.nextInt();
                 String entityType = in.next();

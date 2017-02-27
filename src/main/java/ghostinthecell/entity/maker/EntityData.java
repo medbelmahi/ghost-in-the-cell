@@ -23,5 +23,6 @@ public class EntityData {
 
     public void writeInto(Entity entity) {
         entity.update(arg1, arg2, arg3, arg4, arg5);
+        entity.nextTurn();
     }
 }

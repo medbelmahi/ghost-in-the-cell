@@ -1,6 +1,7 @@
 package ghostinthecell.entity;
 
 import ghostinthecell.Board;
+import ghostinthecell.Challenger;
 import ghostinthecell.entity.maker.EntityData;
 
 /**
@@ -10,6 +11,7 @@ public abstract class Entity {
     int cyborgsCount;
     int owner;
     int id;
+    int currentTurn = 0;
 
     public Entity(int id) {
         this.id = id;
@@ -24,17 +26,13 @@ public abstract class Entity {
     public String owner() {
         switch (owner) {
             case Board.ME :
-                return "ME";
+                return Challenger.ME;
                 case Board.OPPONENT:
-                    return "OPPONENT";
+                    return Challenger.OPPONENT;
                     case Board.NEUTRAL:
-                        return "NEUTRAL";
+                        return Challenger.NEUTRAL;
         }
         return "";
-    }
-
-    public boolean cyborgsMoreThen(Entity entity) {
-        return this.cyborgsCount > entity.cyborgsCount;
     }
 
     public int id() {
@@ -45,4 +43,15 @@ public abstract class Entity {
     public boolean equals(Object obj) {
         return this.id == ((Entity) obj).id;
     }
+
+    public abstract void moveInto(Challenger challenger);
+
+    public void nextTurn() {
+        currentTurn++;
+    }
+
+    public boolean deadEntity(int turn) {
+        return currentTurn < turn;
+    }
+
 }

@@ -1,4 +1,6 @@
-package ghostinthecell.entity;
+package ghostinthecell.custom;
+
+import ghostinthecell.entity.Factory;
 
 import java.util.Comparator;
 
@@ -9,6 +11,6 @@ public class BestProducerComparator implements Comparator<Factory> {
 
     @Override
     public int compare(Factory f1, Factory f2) {
-        return f2.compareProductivity(f1);
+        return f1.score() < f2.score() ? 1 : -1;
     }
 }

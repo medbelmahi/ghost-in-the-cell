@@ -1,17 +1,13 @@
 package ghostinthecell.entity;
 
+import ghostinthecell.Challenger;
+
 import java.util.Map;
 
 /**
  * Created by Mohamed BELMAHI on 25/02/2017.
  */
-public class Troop extends Entity{
-
-    private int source;
-    private int target;
-    private int remaining;
-    private Factory sourceFactory;
-    private Factory targetFactory;
+public class Troop extends Tripper{
 
     public Troop(int id) {
         super(id);
@@ -19,21 +15,24 @@ public class Troop extends Entity{
 
     @Override
     public void update(int... args) {
-        this.owner = args[0];
-        this.source = args[1];
-        this.target = args[2];
+        super.update(args);
         this.cyborgsCount = args[3];
         this.remaining = args[4];
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public void moveInto(Challenger challenger) {
+        challenger.addTroop(this);
     }
 
     public void matchFactories(Map<Integer, Entity> entities) {
         this.sourceFactory = (Factory) entities.get(this.source);
         this.targetFactory = (Factory) entities.get(this.target);
         this.targetFactory.addComingTroop(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
     }
 }
