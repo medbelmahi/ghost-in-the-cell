@@ -2,16 +2,14 @@ package ghostinthecell;
 
 import ghostinthecell.challenge.actions.Action;
 import ghostinthecell.challenge.strategy.GameStrategy;
-import ghostinthecell.challenge.strategy.UnderAttack;
+import ghostinthecell.challenge.strategy.UnderAttackBomb;
 import ghostinthecell.custom.BadProducerComparator;
 import ghostinthecell.custom.BestProducerComparator;
 import ghostinthecell.custom.PriorityComparator;
 import ghostinthecell.entity.*;
+import ghostinthecell.entity.state.OwnerState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by Mohamed BELMAHI on 25/02/2017.
@@ -33,11 +31,13 @@ public class Challenger {
     private List<Bomb> myBombs = new ArrayList<>();
     private List<Bomb> opponentBombs = new ArrayList<>();
 
+    private TreeSet<Factory> underMyEyes = new TreeSet<>(new BestProducerComparator());
+
     public Challenger(Map<Integer, Entity> entities, Board game) {
         this.entities = entities;
         this.game = game;
 
-        this.gameStrategies.add(new UnderAttack());
+        this.gameStrategies.add(new UnderAttackBomb());
     }
 
     public List<Action> makeActions() {
@@ -45,7 +45,7 @@ public class Challenger {
         List<Action> actions = new ArrayList<>();
 
         for (Factory myFactory : myFactories) {
-            List<Action> actions_ = myFactory.action(neutralFactories, opponentFactories);
+            List<Action> actions_ = myFactory.action(neutralFactories, opponentFactories, underMyEyes);
             actions.addAll(actions_);
         }
 
@@ -63,23 +63,39 @@ public class Challenger {
         opponentBombs.clear();
 
         neutralFactories.clear();
+        System.err.println("entities size : " + entities.values().size());
 
-        for (Entity entity : entities.values()) {
+        Iterator<Entity> it = entities.values().iterator();
+        while (it.hasNext()) {
+            Entity entity = it.next();
             if (game.isDeadEntity(entity)) {
-                entities.remove(entity.id());
+                entity.myFightIsOver();
+                it.remove();
             } else {
                 entity.moveInto(this);
             }
         }
 
+        initUnderMyEyes();
+
+        for (Factory underMyEye : underMyEyes) {
+            System.err.println("under my eye : " + underMyEye.id());
+        }
+
         for (GameStrategy gameStrategy : gameStrategies) {
             gameStrategy.processing(this);
         }
+    }
+
+    private void initUnderMyEyes() {
+        this.underMyEyes.clear();
 
         for (Factory neutralFactory : neutralFactories) {
-            System.err.println("id " + neutralFactory.id());
+            Factory nearFactory = neutralFactory.nearFactory();
+            if (nearFactory.owner().equals(OwnerState.ME)) {
+                underMyEyes.add(neutralFactory);
+            }
         }
-
     }
 
     public void addFactory(Factory factory) {

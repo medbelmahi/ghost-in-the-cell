@@ -9,8 +9,8 @@ import java.util.Map;
  */
 public class Troop extends Tripper{
 
-    public Troop(int id) {
-        super(id);
+    public Troop(int id, int currentTurn) {
+        super(id, currentTurn);
     }
 
     @Override
@@ -28,6 +28,11 @@ public class Troop extends Tripper{
     @Override
     public void moveInto(Challenger challenger) {
         challenger.addTroop(this);
+    }
+
+    @Override
+    public void myFightIsOver() {
+        //do nothing
     }
 
     public void matchFactories(Map<Integer, Entity> entities) {

@@ -14,14 +14,15 @@ public class EntityFactory {
     public static final String FACTORY = "FACTORY";
     public static final String BOMB = "BOMB";
 
-    public static Entity constract(String entityType, int entityId) {
+    public static Entity constract(String entityType, int entityId, int turn) {
         switch (entityType) {
             case TROOP :
-                return new Troop(entityId);
+                return new Troop(entityId, turn);
             case FACTORY :
-                return new Factory(entityId);
+                return new Factory(entityId, turn);
             case BOMB:
-                return new Bomb(entityId);
+                System.err.println("boooob");
+                return new Bomb(entityId, turn);
         }
         return null;
     }

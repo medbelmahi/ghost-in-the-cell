@@ -21,13 +21,14 @@ public class Player {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
-
+            //System.err.println(factory1 + " --> " + factory2 + " : " + distance);
             gameBoard.writeDistance(factory1, factory2, distance);
         }
 
         // game loop
         while (true) {
             int entityCount = in.nextInt(); // the number of entities (e.g. factories and troops)
+            System.err.println("entityCount : " + entityCount);
             gameBoard.newTurn();
             for (int i = 0; i < entityCount; i++) {
                 int entityId = in.nextInt();

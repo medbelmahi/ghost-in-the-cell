@@ -13,13 +13,13 @@ public abstract class Tripper extends Entity {
     protected Factory sourceFactory;
     protected Factory targetFactory;
 
-    public Tripper(int id) {
-        super(id);
+    public Tripper(int id, int currentTurn) {
+        super(id, currentTurn);
     }
 
     @Override
     public void update(int... args) {
-        this.owner = args[0];
+        super.update(args);
         this.source = args[1];
         this.target = args[2];
     }

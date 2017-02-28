@@ -3,36 +3,40 @@ package ghostinthecell.entity;
 import ghostinthecell.Board;
 import ghostinthecell.Challenger;
 import ghostinthecell.entity.maker.EntityData;
+import ghostinthecell.entity.state.OwnerState;
 
 /**
  * Created by Mohamed BELMAHI on 25/02/2017.
  */
 public abstract class Entity {
     int cyborgsCount;
-    int owner;
+    private OwnerState owner;
     int id;
-    int currentTurn = 0;
+    int currentTurn;
 
-    public Entity(int id) {
+    public Entity(int id, int currentTurn) {
         this.id = id;
+        this.currentTurn = currentTurn - 1;
     }
 
     public void update(EntityData entityData) {
         entityData.writeInto(this);
     }
 
-    public abstract void update(int... args);
+    public void update(int... args) {
+        this.owner = ownerState(args[0]);
+    }
 
-    public String owner() {
-        switch (owner) {
+    public OwnerState ownerState(int ownerInput) {
+        switch (ownerInput) {
             case Board.ME :
-                return Challenger.ME;
-                case Board.OPPONENT:
-                    return Challenger.OPPONENT;
-                    case Board.NEUTRAL:
-                        return Challenger.NEUTRAL;
+                return OwnerState.ME;
+            case Board.OPPONENT:
+                return OwnerState.OPPONENT;
+            case Board.NEUTRAL:
+                return OwnerState.NEUTRAL;
         }
-        return "";
+        return OwnerState.OTHER;
     }
 
     public int id() {
@@ -54,4 +58,9 @@ public abstract class Entity {
         return currentTurn < turn;
     }
 
+    public OwnerState owner() {
+        return owner;
+    }
+
+    public abstract void myFightIsOver();
 }

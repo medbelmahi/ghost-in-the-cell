@@ -5,9 +5,9 @@ import ghostinthecell.Challenger;
 /**
  * Created by Mohamed BELMAHI on 26/02/2017.
  */
-public class UnderAttack extends GameStrategy {
+public class UnderAttackBomb extends GameStrategy {
 
-    public UnderAttack() {
+    public UnderAttackBomb() {
         super(0);
     }
 

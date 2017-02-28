@@ -35,15 +35,13 @@ public class Board {
 
         firstFactory.addDistance(secondFactory, distance);
         secondFactory.addDistance(firstFactory, distance);
-
-        entities.put(factory1, firstFactory);
-        entities.put(factory2, secondFactory);
     }
 
     private Factory getFactory(int factoryID) {
         Factory factory = (Factory) entities.get(factoryID);
         if (factory == null) {
-            factory = new Factory(factoryID);
+            factory = new Factory(factoryID, turn);
+            entities.put(factoryID, factory);
         }
         return factory;
     }
@@ -52,7 +50,8 @@ public class Board {
 
         Entity entity = entities.get(entityId);
         if (entity == null) {
-            entity = EntityFactory.constract(entityType, entityId);
+            entity = EntityFactory.constract(entityType, entityId, turn);
+            entities.put(entityId, entity);
         }
         entity.update(entityData);
     }
