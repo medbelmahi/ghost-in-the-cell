@@ -17,6 +17,7 @@ public class Move extends Action {
         this.source = myFactory;
         this.destination = neutralFactory;
         this.cyborgCount = cyborgCount;
+        myFactory.decreaseCyborgs(cyborgCount);
     }
 
     @Override

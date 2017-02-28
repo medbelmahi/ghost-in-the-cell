@@ -1,12 +1,12 @@
 package ghostinthecell;
 
 import ghostinthecell.challenge.actions.Action;
-import ghostinthecell.challenge.strategy.GameStrategy;
-import ghostinthecell.challenge.strategy.UnderAttackBomb;
 import ghostinthecell.custom.BadProducerComparator;
 import ghostinthecell.custom.BestProducerComparator;
-import ghostinthecell.custom.PriorityComparator;
-import ghostinthecell.entity.*;
+import ghostinthecell.entity.Bomb;
+import ghostinthecell.entity.Entity;
+import ghostinthecell.entity.Factory;
+import ghostinthecell.entity.Troop;
 import ghostinthecell.entity.state.OwnerState;
 
 import java.util.*;
@@ -21,23 +21,22 @@ public class Challenger {
     public static final String NEUTRAL = "NEUTRAL";
 
     private Board game;
+    private Set<Factory> gameFactories;
     private Map<Integer, Entity> entities;
-    private TreeSet<Factory> myFactories = new TreeSet<Factory>(new BadProducerComparator());
-    private TreeSet<Factory> opponentFactories = new TreeSet<Factory>(new BestProducerComparator());
-    private TreeSet<Factory> neutralFactories = new TreeSet<Factory>(new BestProducerComparator());
-    private TreeSet<GameStrategy> gameStrategies = new TreeSet<>(new PriorityComparator());
+    public TreeSet<Factory> myFactories = new TreeSet<Factory>(new BadProducerComparator());
+    public TreeSet<Factory> opponentFactories = new TreeSet<Factory>(new BestProducerComparator());
+    public TreeSet<Factory> neutralFactories = new TreeSet<Factory>(new BestProducerComparator());
     private List<Troop> myTroops = new ArrayList<>();
     private List<Troop> opponentTroops = new ArrayList<>();
     private List<Bomb> myBombs = new ArrayList<>();
     private List<Bomb> opponentBombs = new ArrayList<>();
 
-    private TreeSet<Factory> underMyEyes = new TreeSet<>(new BestProducerComparator());
+    public TreeSet<Factory> underMyEyes = new TreeSet<>(new BestProducerComparator());
 
-    public Challenger(Map<Integer, Entity> entities, Board game) {
+    public Challenger(Map<Integer, Entity> entities, Board game, Set<Factory> gameFactories) {
         this.entities = entities;
         this.game = game;
-
-        this.gameStrategies.add(new UnderAttackBomb());
+        this.gameFactories = gameFactories;
     }
 
     public List<Action> makeActions() {
@@ -45,7 +44,7 @@ public class Challenger {
         List<Action> actions = new ArrayList<>();
 
         for (Factory myFactory : myFactories) {
-            List<Action> actions_ = myFactory.action(neutralFactories, opponentFactories, underMyEyes);
+            List<Action> actions_ = myFactory.action(game);
             actions.addAll(actions_);
         }
 
@@ -82,8 +81,12 @@ public class Challenger {
             System.err.println("under my eye : " + underMyEye.id());
         }
 
-        for (GameStrategy gameStrategy : gameStrategies) {
-            gameStrategy.processing(this);
+        setStrategy();
+    }
+
+    private void setStrategy() {
+        for (Factory gameFactory : gameFactories) {
+            gameFactory.updateStrategy();
         }
     }
 

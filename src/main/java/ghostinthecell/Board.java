@@ -5,10 +5,9 @@ import ghostinthecell.entity.Entity;
 import ghostinthecell.entity.Factory;
 import ghostinthecell.entity.maker.EntityData;
 import ghostinthecell.entity.maker.EntityFactory;
+import ghostinthecell.entity.maker.EntityType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Mohamed BELMAHI on 25/02/2017.
@@ -20,12 +19,13 @@ public class Board {
     public static final int NEUTRAL = 0;
 
     Map<Integer, Entity> entities = new HashMap<>();
-    Challenger me;
+    Set<Factory> gameFactories = new HashSet<>();
+    public Challenger me;
 
     int turn;
 
     public Board() {
-        this.me = new Challenger(entities, this);
+        this.me = new Challenger(entities, this, gameFactories);
         turn = 0;
     }
 
@@ -42,6 +42,7 @@ public class Board {
         if (factory == null) {
             factory = new Factory(factoryID, turn);
             entities.put(factoryID, factory);
+            gameFactories.add(factory);
         }
         return factory;
     }
@@ -50,7 +51,7 @@ public class Board {
 
         Entity entity = entities.get(entityId);
         if (entity == null) {
-            entity = EntityFactory.constract(entityType, entityId, turn);
+            entity = EntityFactory.newEntity(EntityType.valueOf(entityType), entityId, turn);
             entities.put(entityId, entity);
         }
         entity.update(entityData);

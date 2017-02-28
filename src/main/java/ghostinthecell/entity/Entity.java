@@ -63,4 +63,12 @@ public abstract class Entity {
     }
 
     public abstract void myFightIsOver();
+
+    public void decreaseCyborgs(int cyborgCount) {
+        this.cyborgsCount -= cyborgCount;
+    }
+
+    public boolean hasMoreCyborgs() {
+        return cyborgsCount > 0;
+    }
 }

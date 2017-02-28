@@ -1,21 +1,20 @@
 package ghostinthecell.challenge.strategy;
 
-import ghostinthecell.Challenger;
+import ghostinthecell.Board;
+import ghostinthecell.challenge.actions.Action;
+import ghostinthecell.entity.Factory;
+
+import java.util.List;
 
 /**
  * Created by Mohamed BELMAHI on 26/02/2017.
  */
 public abstract class GameStrategy {
-    private int priority;
+    Factory factory;
 
-    public GameStrategy(int priority) {
-        this.priority = priority;
+    public GameStrategy(Factory factory) {
+        this.factory = factory;
     }
 
-    public int compareWith(GameStrategy gameStrategy) {
-        int sub = this.priority - gameStrategy.priority;
-        return sub == 0 ? 0 : sub > 1 ? 1 : -1 ;
-    }
-
-    public abstract void processing(Challenger challenger);
+    public abstract List<Action> processing(Board game);
 }
