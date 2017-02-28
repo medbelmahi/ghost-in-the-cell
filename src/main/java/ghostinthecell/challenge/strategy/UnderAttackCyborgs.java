@@ -20,7 +20,7 @@ public class UnderAttackCyborgs extends GameStrategy {
     @Override
     public List<Action> processing(Board game) {
         List<Action> actions = new ArrayList<>();
-        
+
         return null;
     }
 }

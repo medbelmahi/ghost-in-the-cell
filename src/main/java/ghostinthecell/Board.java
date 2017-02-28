@@ -3,6 +3,7 @@ package ghostinthecell;
 import ghostinthecell.challenge.actions.Action;
 import ghostinthecell.entity.Entity;
 import ghostinthecell.entity.Factory;
+import ghostinthecell.entity.graph.GraphAllPaths;
 import ghostinthecell.entity.maker.EntityData;
 import ghostinthecell.entity.maker.EntityFactory;
 import ghostinthecell.entity.maker.EntityType;
@@ -21,6 +22,7 @@ public class Board {
     Map<Integer, Entity> entities = new HashMap<>();
     Set<Factory> gameFactories = new HashSet<>();
     public Challenger me;
+    private GraphAllPaths<Factory> graph = new GraphAllPaths<Factory>();
 
     int turn;
 
@@ -35,6 +37,10 @@ public class Board {
 
         firstFactory.addDistance(secondFactory, distance);
         secondFactory.addDistance(firstFactory, distance);
+
+        graph.addNode(firstFactory);
+        graph.addNode(secondFactory);
+        graph.addEdge(firstFactory, secondFactory, distance);
     }
 
     private Factory getFactory(int factoryID) {
