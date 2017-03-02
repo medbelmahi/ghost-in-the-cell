@@ -21,7 +21,6 @@ public class Player {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
-            //System.err.println(factory1 + " --> " + factory2 + " : " + distance);
             gameBoard.writeDistance(factory1, factory2, distance);
         }
 

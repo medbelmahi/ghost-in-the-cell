@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Mohamed BELMAHI on 28/02/2017.
  */
-public class GraphAllPaths <T extends Factory> implements Iterable<T> {
+public class GraphFindAllPaths<T extends Object> implements Iterable<T> {
 
     public final Map<T, Map<T, Integer>> graph = new HashMap<>();
 
