@@ -20,7 +20,7 @@ public class Board {
     public static final int NEUTRAL = 0;
 
     private Map<Integer, Entity> entities = new HashMap<>();
-    private Set<Factory> gameFactories = new HashSet<>();
+    public Set<Factory> gameFactories = new HashSet<>();
     public Challenger me;
     public static GraphFindAllPaths<Factory> graph = new GraphFindAllPaths<Factory>();
 
@@ -42,11 +42,10 @@ public class Board {
     }
 
     private void addIntoGraph(Factory firstFactory, Factory secondFactory, int distance) {
-        //if (OwnerState.ME.equals(firstFactory.owner()) && OwnerState.ME.equals(secondFactory.owner())) {
             graph.addNode(firstFactory);
             graph.addNode(secondFactory);
             graph.addEdge(firstFactory, secondFactory, distance);
-        //}
+            graph.addEdge(secondFactory, firstFactory, distance);
     }
 
     private Factory getFactory(int factoryID) {
@@ -91,5 +90,12 @@ public class Board {
 
     public boolean isDeadEntity(Entity entity) {
         return entity.deadEntity(turn);
+    }
+
+    public void firstTurnCalculator() {
+        for (Factory gameFactory : this.gameFactories) {
+            System.err.println("id : " + gameFactory.id() + " size : " + graph.edgesFrom(gameFactory).size());
+            gameFactory.initMe(graph);
+        }
     }
 }

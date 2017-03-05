@@ -1,3 +1,4 @@
+import java.math.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 import java.util.List;
@@ -18,7 +19,7 @@ class Board {
     public static final int NEUTRAL = 0;
 
     private Map<Integer, Entity> entities = new HashMap<>();
-    private Set<Factory> gameFactories = new HashSet<>();
+    public Set<Factory> gameFactories = new HashSet<>();
     public Challenger me;
     public static GraphFindAllPaths<Factory> graph = new GraphFindAllPaths<Factory>();
 
@@ -40,11 +41,10 @@ class Board {
     }
 
     private void addIntoGraph(Factory firstFactory, Factory secondFactory, int distance) {
-        //if (OwnerState.ME.equals(firstFactory.owner()) && OwnerState.ME.equals(secondFactory.owner())) {
             graph.addNode(firstFactory);
             graph.addNode(secondFactory);
             graph.addEdge(firstFactory, secondFactory, distance);
-        //}
+            graph.addEdge(secondFactory, firstFactory, distance);
     }
 
     private Factory getFactory(int factoryID) {
@@ -90,6 +90,13 @@ class Board {
     public boolean isDeadEntity(Entity entity) {
         return entity.deadEntity(turn);
     }
+
+    public void firstTurnCalculator() {
+        for (Factory gameFactory : this.gameFactories) {
+            System.err.println("id : " + gameFactory.id() + " size : " + graph.edgesFrom(gameFactory).size());
+            gameFactory.initMe(graph);
+        }
+    }
 }
 
 
@@ -132,6 +139,14 @@ class BombAction extends Action {
     public String writeAction() {
         return super.writeAction() + SPACE + source.id() + SPACE + destination.id();
     }
+}
+
+
+/**
+ * Created by Mohamed BELMAHI on 05/03/2017.
+ */
+enum FactoryRequestType {
+    HELP, INCREASE, ATTACK
 }
 
 
@@ -180,11 +195,76 @@ class Move extends Action {
 }
 
 
+
+
 /**
  * Created by Mohamed BELMAHI on 28/02/2017.
  */
 class Request {
+    private final Factory from;
+    private int cyborgsCount;
+    private final FactoryRequestType requestType;
 
+    public Request(Factory from, int cyborgsCount, FactoryRequestType requestType) {
+        this.from = from;
+        this.cyborgsCount = cyborgsCount;
+        this.requestType = requestType;
+    }
+
+    public int priorityCompare(Request o2) {
+
+        if (this.requestType.equals(o2.requestType)) {
+            return 0;
+        } else if (FactoryRequestType.HELP.equals(this.requestType)) {
+            return 1;
+        } else if (FactoryRequestType.INCREASE.equals(this.requestType) && FactoryRequestType.ATTACK.equals(o2.requestType)) {
+            return 1;
+        }
+
+        return -1;
+    }
+
+    public boolean addActions(List<Action> actions) {
+        this.from.replyToMyRequest(this);
+
+        if (!this.done()) {
+            for (Factory factory : this.from.sortedByDistance) {
+                if (factory.owner().equals(OwnerState.ME)) {
+                    if (this.done()) {
+                        return true;
+                    } else {
+                        actions.add(factory.reply(this));
+                    }
+                }
+            }
+        }
+
+        return this.done();
+    }
+
+    private boolean done() {
+        return this.cyborgsCount <= 0;
+    }
+
+
+    public Action makeAction(Factory factory, Factory from, int cyborgsCount) {
+        int necessaryCyborgs = this.cyborgsCount < cyborgsCount ? this.cyborgsCount : cyborgsCount;
+        return new Move(factory, from, necessaryCyborgs);
+    }
+
+    public void subNeeds(int cyborgsCount) {
+        this.cyborgsCount -= cyborgsCount;
+    }
+
+
+    public Factory getFrom() {
+        return from;
+    }
+
+    @Override
+    public String toString() {
+        return "from : " + from.id() + " cyborgsCount : " + cyborgsCount + " type : "+requestType.toString();
+    }
 }
 
 
@@ -273,8 +353,7 @@ class Standard extends GameStrategy {
             actions.add(new Increase(this.factory));
         }
 
-        boolean done = moveCyborgs(game.me.underMyEyes, actions, true) ||
-                moveCyborgs(game.me.neutralFactories, actions, false) ||
+        boolean done =                 moveCyborgs(game.me.neutralFactories, actions, false) ||
                 moveCyborgs(game.me.opponentFactories, actions, false);
 
         actions.add(new Wait());
@@ -287,7 +366,7 @@ class Standard extends GameStrategy {
             Iterator<Factory> it = useSort ? bestTargetSort(factories).iterator() : nearbySort(factories).iterator();
             while (it.hasNext()) {
                 Factory factory = it.next();
-                int necessaryCyborgs = factory.necessaryCyborgs(this.factory);
+                int necessaryCyborgs = 0;
                 if (!factory.isReachable() && this.factory.hasMoreCyborgsThen(necessaryCyborgs)) {
                     actions.add(new Move(this.factory, factory, necessaryCyborgs));
 
@@ -388,7 +467,7 @@ class UnderAttackByBomb extends GameStrategy {
             }
         }*/
 
-        moveCyborgs(game.me.underMyEyes, actions);
+        //moveCyborgs(game.me.underMyEyes, actions);
         moveCyborgs(game.me.neutralFactories, actions);
         moveCyborgs(game.me.opponentFactories, actions);
         moveCyborgs(game.me.myFactories, actions);
@@ -403,7 +482,7 @@ class UnderAttackByBomb extends GameStrategy {
             Iterator<Factory> it = factories.iterator();
             while (it.hasNext()) {
                 Factory factory = it.next();
-                int necessaryCyborgs1 = factory.necessaryCyborgs(this.factory);
+                int necessaryCyborgs1 = 0;
                 int necessaryCyborgs = this.factory.cyborgsCountMoreOrEqual(necessaryCyborgs1) ? necessaryCyborgs1 : this.factory.cyborgsCount;
                 if (!factory.isUnderAttackByBomb() && this.factory.hasMoreCyborgs()) {
                     actions.add(new Move(this.factory, factory, necessaryCyborgs));
@@ -478,8 +557,10 @@ class Challenger {
     private List<Bomb> myBombs = new ArrayList<>();
     private List<Bomb> opponentBombs = new ArrayList<>();
     private int bombSize;
+    private TreeSet<Request> requests = new TreeSet<>(new RequestPriorityComparator());
 
-    public TreeSet<Factory> underMyEyes = new TreeSet<>(new BestProducerComparator());
+    private Factory currentTarget;
+    private Factory currentAttackCentre;
 
     public Challenger(Map<Integer, Entity> entities, Board game, Set<Factory> gameFactories) {
         this.entities = entities;
@@ -492,24 +573,62 @@ class Challenger {
 
         List<Action> actions = new ArrayList<>();
 
+        List<Request> requests = new ArrayList<>();
         for (Factory myFactory : myFactories) {
-            System.err.println("my factory : " + myFactory.id());
-            List<Action> actions_ = myFactory.action(game);
-            actions.addAll(actions_);
+            requests.addAll(myFactory.makeRequests());
         }
 
+        if (currentAttackCentre == null || !currentAttackCentre.owner().equals(OwnerState.ME)) {
+            return actions;
+        }
+        requests.addAll(currentAttackCentre.attackRequest(currentTarget));
+
+
+        System.err.println("request size : " + requests.size());
+
+        increaseAction(actions, requests);
+
+        for (Request request : requests) {
+            System.err.println(request.toString());
+            request.addActions(actions);
+        }
+
+        actions.addAll(currentAttackCentre.attackActions(currentTarget));
+
+        bombAction(actions);
+
+        for (Action action : actions) {
+            System.err.println("action : " + action.writeAction());
+        }
+
+        return actions;
+    }
+
+    private void increaseAction(List<Action> actions, List<Request> requests) {
+
+        if (game.me.myFactories.size() >= (game.gameFactories.size() / 2)) {
+            Factory toBeIncreased = nextIncreasable();
+
+            if (toBeIncreased != null) {
+                if (toBeIncreased.cyborgsCountMoreOrEqual(10)) {
+                    actions.add(new Increase(toBeIncreased));
+                } else {
+                    requests.add(new Request(toBeIncreased, 10, FactoryRequestType.INCREASE));
+                }
+            }
+        }
+    }
+
+    private void bombAction(List<Action> actions) {
         if (this.bombSize > 0 && this.myFactories.size() > 0) {
             for (Factory opponentFactory : this.opponentFactories) {
-                if (opponentFactory.productionSize == 3 && opponentFactory.cyborgsCount > 20 && !opponentFactory.isUnderAttackByBomb()) {
+                if (opponentFactory.productionSize == 3 && opponentFactory.cyborgsCount >= 10 && !opponentFactory.isUnderAttackByBomb()) {
                     actions.add(new BombAction(opponentFactory.nearFactory(OwnerState.ME), opponentFactory));
                     this.bombSize--;
                     break;
                 }
             }
         }
-
-
-        return actions;
     }
 
     public void processing() {
@@ -523,7 +642,6 @@ class Challenger {
         opponentBombs.clear();
 
         neutralFactories.clear();
-        System.err.println("entities size : " + entities.values().size());
 
         Iterator<Entity> it = entities.values().iterator();
         while (it.hasNext()) {
@@ -536,30 +654,68 @@ class Challenger {
             }
         }
 
-        initUnderMyEyes();
+        if (currentTarget == null
+                || OwnerState.ME.equals(currentTarget.owner())
+                || currentAttackCentre == null
+                || !OwnerState.ME.equals(currentAttackCentre.owner())) {
 
-        for (Factory underMyEye : underMyEyes) {
-            System.err.println("under my eye : " + underMyEye.id());
+            currentTarget = nextTarget();
+            currentAttackCentre = currentTarget.nearFactory(OwnerState.ME);
+
+            //System.err.println("currentTarget : " + currentTarget != null ? currentTarget.id() : "null");
+            //System.err.println("currentAttackCentre : " + currentAttackCentre != null ? currentAttackCentre.id() : "null");
         }
 
-        setStrategy();
     }
 
-    private void setStrategy() {
-        for (Factory gameFactory : gameFactories) {
-            gameFactory.updateStrategy();
-        }
-    }
+    private Factory nextIncreasable() {
+        TreeSet<Factory> factories = new TreeSet<>(new Comparator<Factory>() {
+            @Override
+            public int compare(Factory o1, Factory o2) {
+                int totalDistance_1 = 0;
+                int totalDistance_2 = 0;
+                for (Factory myFactory : opponentFactories) {
+                    int distance_1 = myFactory.getDistanceFrom(o1);
+                    int distance_2 = myFactory.getDistanceFrom(o2);
 
-    private void initUnderMyEyes() {
-        this.underMyEyes.clear();
+                    totalDistance_1 += distance_1;
+                    totalDistance_2 += distance_2;
+                }
 
-        for (Factory neutralFactory : neutralFactories) {
-            Factory nearFactory = neutralFactory.nearFactory();
-            if (nearFactory.owner().equals(OwnerState.ME)) {
-                underMyEyes.add(neutralFactory);
+                return totalDistance_1 == totalDistance_2 ? 0 : totalDistance_1 < totalDistance_2 ? 1 : -1;
+            }
+        });
+
+        for (Factory myFactory : myFactories) {
+            if (myFactory.productionSize < 3) {
+                factories.add(myFactory);
             }
         }
+
+        return factories.size() > 0 ? factories.first() : null;
+    }
+
+    private Factory nextTarget() {
+        TreeSet<Factory> factories = new TreeSet<>(new Comparator<Factory>() {
+            @Override
+            public int compare(Factory o1, Factory o2) {
+                int totalDistance_1 = 0;
+                int totalDistance_2 = 0;
+                for (Factory myFactory : myFactories) {
+                    int distance_1 = myFactory.getDistanceFrom(o1);
+                    int distance_2 = myFactory.getDistanceFrom(o2);
+
+                    totalDistance_1 += distance_1;
+                    totalDistance_2 += distance_2;
+                }
+
+                return totalDistance_1 == totalDistance_2 ? 0 : totalDistance_1 > totalDistance_2 ? 1 : -1;
+            }
+        });
+
+        factories.addAll(neutralFactories);
+        factories.addAll(opponentFactories);
+        return factories.first();
     }
 
     public void addFactory(Factory factory) {
@@ -629,6 +785,19 @@ class BestProducerComparator implements Comparator<Factory> {
     @Override
     public int compare(Factory f1, Factory f2) {
         return f1.score() < f2.score() ? 1 : -1;
+    }
+}
+
+
+
+
+/**
+ * Created by Mohamed BELMAHI on 05/03/2017.
+ */
+class RequestPriorityComparator implements Comparator<Request> {
+    @Override
+    public int compare(Request o1, Request o2) {
+        return o1.priorityCompare(o2);
     }
 }
 
@@ -770,13 +939,16 @@ abstract class Entity {
  */
 class Factory extends Entity {
 
-    public static final int SAFTY_GUARDIANS = 5;
-
     public Map<Factory, Integer> nextFactories = new HashMap<>();
+    public TreeSet<Factory> sortedByDistance;
+    private Map<Factory, Integer> factoryWithDistance;
+    LinkedHashMap<Factory, LinkedList<LinkedList<Factory>>> allPathsToFactory = new LinkedHashMap<>();
     public int productionSize;
     private Set<Troop> comingTroops = new HashSet<>();
     private Bomb bomb;
-    private GameStrategy usedStrategy;
+    boolean attackCentre = false;
+
+
 
     public Factory(int id, int currentTurn) {
         super(id, currentTurn + 1);
@@ -821,13 +993,10 @@ class Factory extends Entity {
                 necessaryCyborgs += comingTroop.cyborgsCount;
             }
         }
-        if (productionSize == 0) {
-            necessaryCyborgs += 10;
-        }
 
-        Integer distance = Board.graph.distance(this, factory);
-        System.err.println("distance : " + distance);
-        necessaryCyborgs += distance * this.productionSize;
+        if (this.owner().equals(OwnerState.OPPONENT)) {
+            necessaryCyborgs += (this.factoryWithDistance.get(factory) + 1) * productionSize;
+        }
 
         return necessaryCyborgs;
     }
@@ -896,31 +1065,12 @@ class Factory extends Entity {
     }
 
     public Factory nearFactory(OwnerState ownerState) {
-        Integer distance = Integer.MAX_VALUE;
-        Factory nearFactory = null;
-        for (Map.Entry<Factory, Integer> integerFactory : nextFactories.entrySet()) {
-            Integer nesDistance = integerFactory.getValue();
-            Factory newFactory = integerFactory.getKey();
-
-            if (distance > nesDistance && ownerState.equals(newFactory.owner())) {
-                nearFactory = newFactory;
-                distance = nesDistance;
+        for (Factory factory : sortedByDistance) {
+            if (ownerState.equals(factory.owner())) {
+                return factory;
             }
         }
-        return nearFactory;
-    }
-
-    public void updateStrategy() {
-        this.owner().updateStrategy(this);
-    }
-
-    public void setStrategy(GameStrategy strategy) {
-        this.usedStrategy = strategy;
-    }
-
-    public List<Action> action(Board game) {
-        List<Action> actions = this.usedStrategy.processing(game);
-        return actions;
+        return null;
     }
 
     public boolean cyborgsCountMoreOrEqual(int size) {
@@ -953,6 +1103,140 @@ class Factory extends Entity {
         }
 
         return necessaryCyborgsForSafety;
+    }
+
+    public void initMe(GraphFindAllPaths<Factory> graph) {
+        FindAllPaths<Factory> findAllPaths = new FindAllPaths<>(graph);
+
+        final Map<Factory, Integer> factoryWithDistance = new HashMap<>();
+        //init all Paths to other factories
+        Set<Factory> otherFactories = graph.edgesFrom(this).keySet();
+        for (Factory otherFactory : otherFactories) {
+                SortedSet<Map.Entry<List<Factory>, Integer>> sortedPathWithCost = findAllPaths.sortedPathWithCost(this, otherFactory);
+
+                Iterator<Map.Entry<List<Factory>, Integer>> it = sortedPathWithCost.iterator();
+                LinkedList<LinkedList<Factory>> linkedListOfPaths = new LinkedList<>();
+                while (it.hasNext()) {
+                    Map.Entry<List<Factory>, Integer> next = it.next();
+                    linkedListOfPaths.add(new LinkedList<Factory>(next.getKey()));
+                }
+                allPathsToFactory.put(otherFactory, linkedListOfPaths);
+                factoryWithDistance.put(otherFactory, graph.distance(this, otherFactory));
+        }
+
+        this.factoryWithDistance = factoryWithDistance;
+
+        //init sortedByDistance
+        this.sortedByDistance = new TreeSet<>(new Comparator<Factory>() {
+            @Override
+            public int compare(Factory o1, Factory o2) {
+
+                int distance_1 = factoryWithDistance.get(o1);
+                int distance_2 = factoryWithDistance.get(o2);
+                return distance_1 >= distance_2 ? 1 : -1;
+            }
+        });
+        this.sortedByDistance.addAll(otherFactories);
+    }
+
+    public List<Request> makeRequests() {
+        List<Request> requests = new ArrayList<>();
+        if (isUnderAttackByCyborgs()) {
+
+            int cyborgsCount = necessaryCyborgsForSafety();
+            cyborgsCount = cyborgsCount < this.cyborgsCount ? 0 : cyborgsCount - this.cyborgsCount;
+            if (cyborgsCount > 0) {
+                requests.add(new Request(this, cyborgsCount, FactoryRequestType.HELP));
+                this.cyborgsCount = 0;
+            } else {
+                this.cyborgsCount -= cyborgsCount;
+            }
+        }
+
+
+        return requests;
+    }
+
+    public int getDistanceFrom(Factory o1) {
+        return factoryWithDistance.get(o1);
+    }
+
+    public List<Request> attackRequest(Factory currentTarget) {
+
+        List<Request> requests = new ArrayList<>();
+        requests.add(buildAttackRequest(currentTarget));
+
+        for (Factory factory : this.sortedByDistance) {
+            if (!factory.equals(currentTarget) && !factory.owner().equals(OwnerState.ME)) {
+                requests.add(buildAttackRequest(factory));
+            }
+        }
+
+        return requests;
+    }
+
+    private Request buildAttackRequest(Factory currentTarget) {
+        Request request = new Request(this, currentTarget.necessaryCyborgs(this), FactoryRequestType.ATTACK);
+        return request;
+    }
+
+    public Action reply(Request request) {
+        if (this.cyborgsCount > 0) {
+            //LinkedList<LinkedList<Factory>> allPaths = allPathsToFactory.get(request.getFrom());
+            //for (LinkedList<Factory> path : allPaths) {
+                //if (safetyPath(path)) {
+                    return request.makeAction(this, request.getFrom(), this.cyborgsCount);
+                //}
+            //}
+        }
+        return new Wait();
+    }
+
+    private Factory getFirstEle(LinkedList<Factory> path) {
+        for (Factory factory : path) {
+            if (!factory.equals(this)) {
+                return factory;
+            }
+        }
+        return this;
+    }
+
+    private boolean safetyPath(LinkedList<Factory> path) {
+        for (Factory factory : path) {
+            if (!factory.owner().equals(OwnerState.ME)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void replyToMyRequest(Request request) {
+        request.subNeeds(this.cyborgsCount);
+    }
+
+    private Action attackAction(Factory currentTarget) {
+        if (this.cyborgsCount > 0 && !currentTarget.isReachable()) {
+            int necessaryCyborgs = currentTarget.necessaryCyborgs(this);
+            if (necessaryCyborgs <= this.cyborgsCount) {
+                return new Move(this, currentTarget, necessaryCyborgs);
+            }
+            //necessaryCyborgs = necessaryCyborgs < this.cyborgsCount ? necessaryCyborgs : this.cyborgsCount;
+        }
+
+        return new Wait();
+    }
+
+    public List<Action> attackActions(Factory currentTarget) {
+        List<Action> actions = new ArrayList<>();
+        actions.add(attackAction(currentTarget));
+
+        for (Factory factory : this.sortedByDistance) {
+            if (!factory.equals(currentTarget)) {
+                actions.add(attackAction(factory));
+            }
+        }
+
+        return actions;
     }
 }
 
@@ -1082,7 +1366,8 @@ class FindAllPaths<T extends Factory> {
             totalCost.add(cost);
             path.remove(current);
             return;
-        } else if (OwnerState.ME.equals(current.owner())) {
+        }
+
 
             allEdges = graph.edgesFrom(current);
 
@@ -1091,10 +1376,12 @@ class FindAllPaths<T extends Factory> {
             for (T t : edges) {
                 if (!path.contains(t)) {
                     //System.out.println(t);
-                    recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+                    if (paths.size() < 10) {
+                        recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+                    }
                 }
             }
-        }
+
 
 
         path.remove(current);
@@ -1256,13 +1543,15 @@ class GraphFindAllPaths<T extends Factory> implements Iterable<T> {
     }
 
     public Integer distance(T factory, T factory1) {
-        for (Map.Entry<T, Integer> entry : graph.get(factory).entrySet()) {
+
+        return graph.get(factory).get(factory1);
+        /*for (Map.Entry<T, Integer> entry : graph.get(factory).entrySet()) {
             //System.err.println("f1 : " + entry.getValue().id() + " f2 : " + factory1.id());
             if (entry.getKey().equals(factory1)) {
                 return entry.getValue();
             }
         }
-        return new Integer(0);
+        return new Integer(0);*/
     }
 }
 
@@ -1349,7 +1638,7 @@ enum OwnerState {
             } else if (factory.isUnderAttackByCyborgs()) {
                 //gameStrategy = new UnderAttackCyborgs(factory);
             }
-            factory.setStrategy(gameStrategy);
+            //factory.setStrategy(gameStrategy);
         }
     }, OPPONENT("OPPONENT") {
         @Override
@@ -1461,6 +1750,8 @@ class Player {
 
     public static void main(String args[]) {
 
+        Date begin = new Date();
+
         Board gameBoard = new Board();
 
         Scanner in = new Scanner(System.in);
@@ -1470,8 +1761,15 @@ class Player {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
+
             gameBoard.writeDistance(factory1, factory2, distance);
         }
+
+        gameBoard.firstTurnCalculator();
+
+        Date end = new Date();
+        BigDecimal duration = BigDecimal.valueOf(end.getTime()).subtract(BigDecimal.valueOf(begin.getTime()));
+        System.err.println(duration.longValue());
 
         // game loop
         while (true) {

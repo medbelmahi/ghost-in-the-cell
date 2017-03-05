@@ -25,6 +25,7 @@ public class OneFileMaker {
             content = "import java.util.List;\n" + content;
             content = "import java.awt.geom.Line2D;\n" + content;
             content = "import java.awt.geom.Point2D;\n" + content;
+            content = "import java.math.*;\n" + content;
 
             makePlayerFile(content);
     

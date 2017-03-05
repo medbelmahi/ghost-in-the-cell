@@ -32,8 +32,7 @@ public class Standard extends GameStrategy {
             actions.add(new Increase(this.factory));
         }
 
-        boolean done = moveCyborgs(game.me.underMyEyes, actions, true) ||
-                moveCyborgs(game.me.neutralFactories, actions, false) ||
+        boolean done =                 moveCyborgs(game.me.neutralFactories, actions, false) ||
                 moveCyborgs(game.me.opponentFactories, actions, false);
 
         actions.add(new Wait());
@@ -46,7 +45,7 @@ public class Standard extends GameStrategy {
             Iterator<Factory> it = useSort ? bestTargetSort(factories).iterator() : nearbySort(factories).iterator();
             while (it.hasNext()) {
                 Factory factory = it.next();
-                int necessaryCyborgs = factory.necessaryCyborgs(this.factory);
+                int necessaryCyborgs = 0;
                 if (!factory.isReachable() && this.factory.hasMoreCyborgsThen(necessaryCyborgs)) {
                     actions.add(new Move(this.factory, factory, necessaryCyborgs));
 

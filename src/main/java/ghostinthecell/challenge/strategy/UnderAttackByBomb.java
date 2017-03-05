@@ -40,7 +40,7 @@ public class UnderAttackByBomb extends GameStrategy {
             }
         }*/
 
-        moveCyborgs(game.me.underMyEyes, actions);
+        //moveCyborgs(game.me.underMyEyes, actions);
         moveCyborgs(game.me.neutralFactories, actions);
         moveCyborgs(game.me.opponentFactories, actions);
         moveCyborgs(game.me.myFactories, actions);
@@ -55,7 +55,7 @@ public class UnderAttackByBomb extends GameStrategy {
             Iterator<Factory> it = factories.iterator();
             while (it.hasNext()) {
                 Factory factory = it.next();
-                int necessaryCyborgs1 = factory.necessaryCyborgs(this.factory);
+                int necessaryCyborgs1 = 0;
                 int necessaryCyborgs = this.factory.cyborgsCountMoreOrEqual(necessaryCyborgs1) ? necessaryCyborgs1 : this.factory.cyborgsCount;
                 if (!factory.isUnderAttackByBomb() && this.factory.hasMoreCyborgs()) {
                     actions.add(new Move(this.factory, factory, necessaryCyborgs));

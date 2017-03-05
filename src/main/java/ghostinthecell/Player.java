@@ -2,6 +2,8 @@ package ghostinthecell;
 
 import ghostinthecell.entity.maker.EntityData;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Scanner;
 
 /**
@@ -12,6 +14,8 @@ public class Player {
 
     public static void main(String args[]) {
 
+        Date begin = new Date();
+
         Board gameBoard = new Board();
 
         Scanner in = new Scanner(System.in);
@@ -21,8 +25,15 @@ public class Player {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
+
             gameBoard.writeDistance(factory1, factory2, distance);
         }
+
+        gameBoard.firstTurnCalculator();
+
+        Date end = new Date();
+        BigDecimal duration = BigDecimal.valueOf(end.getTime()).subtract(BigDecimal.valueOf(begin.getTime()));
+        System.err.println(duration.longValue());
 
         // game loop
         while (true) {

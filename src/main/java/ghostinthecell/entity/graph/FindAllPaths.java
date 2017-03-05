@@ -5,7 +5,6 @@ package ghostinthecell.entity.graph;
  */
 
 import ghostinthecell.entity.Factory;
-import ghostinthecell.entity.state.OwnerState;
 
 import java.util.*;
 
@@ -127,7 +126,8 @@ public class FindAllPaths<T extends Factory> {
             totalCost.add(cost);
             path.remove(current);
             return;
-        } else if (OwnerState.ME.equals(current.owner())) {
+        }
+
 
             allEdges = graph.edgesFrom(current);
 
@@ -136,10 +136,12 @@ public class FindAllPaths<T extends Factory> {
             for (T t : edges) {
                 if (!path.contains(t)) {
                     //System.out.println(t);
-                    recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+                    if (paths.size() < 10) {
+                        recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+                    }
                 }
             }
-        }
+
 
 
         path.remove(current);

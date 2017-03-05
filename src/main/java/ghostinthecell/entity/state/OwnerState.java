@@ -18,7 +18,7 @@ public enum OwnerState {
             } else if (factory.isUnderAttackByCyborgs()) {
                 //gameStrategy = new UnderAttackCyborgs(factory);
             }
-            factory.setStrategy(gameStrategy);
+            //factory.setStrategy(gameStrategy);
         }
     }, OPPONENT("OPPONENT") {
         @Override
