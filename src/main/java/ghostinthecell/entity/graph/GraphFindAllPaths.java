@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Mohamed BELMAHI on 28/02/2017.
  */
-public class GraphFindAllPaths<T extends Object> implements Iterable<T> {
+public class GraphFindAllPaths<T extends Factory> implements Iterable<T> {
 
     public final Map<T, Map<T, Integer>> graph = new HashMap<>();
 
@@ -96,5 +96,15 @@ public class GraphFindAllPaths<T extends Object> implements Iterable<T> {
      */
     public Iterator<T> iterator() {
         return graph.keySet().iterator();
+    }
+
+    public Integer distance(T factory, T factory1) {
+        for (Map.Entry<T, Integer> entry : graph.get(factory).entrySet()) {
+            //System.err.println("f1 : " + entry.getValue().id() + " f2 : " + factory1.id());
+            if (entry.getKey().equals(factory1)) {
+                return entry.getValue();
+            }
+        }
+        return new Integer(0);
     }
 }

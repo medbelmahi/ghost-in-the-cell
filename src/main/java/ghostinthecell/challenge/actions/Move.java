@@ -6,8 +6,6 @@ import ghostinthecell.entity.Factory;
  * Created by Mohamed BELMAHI on 25/02/2017.
  */
 public class Move extends Action {
-
-    public static final String SPACE = " ";
     Factory source;
     Factory destination;
     int cyborgCount;

@@ -56,7 +56,7 @@ public class Factory extends Entity {
         return this.productionSize > factory.productionSize ? 1 : -1;
     }
 
-    public int necessaryCyborgs() {
+    public int necessaryCyborgs(Factory factory) {
 
         int necessaryCyborgs = this.cyborgsCount + 1;
         for (Troop comingTroop : comingTroops) {
@@ -64,6 +64,14 @@ public class Factory extends Entity {
                 necessaryCyborgs += comingTroop.cyborgsCount;
             }
         }
+        if (productionSize == 0) {
+            necessaryCyborgs += 10;
+        }
+
+        Integer distance = Board.graph.distance(this, factory);
+        System.err.println("distance : " + distance);
+        necessaryCyborgs += distance * this.productionSize;
+
         return necessaryCyborgs;
     }
 
@@ -177,5 +185,16 @@ public class Factory extends Entity {
             }
         }
         return false;
+    }
+
+    public int necessaryCyborgsForSafety() {
+        int necessaryCyborgsForSafety = 0;
+        for (Troop comingTroop : this.comingTroops) {
+            if (OwnerState.OPPONENT.equals(comingTroop.owner())) {
+                necessaryCyborgsForSafety += comingTroop.cyborgsCount;
+            }
+        }
+
+        return necessaryCyborgsForSafety;
     }
 }

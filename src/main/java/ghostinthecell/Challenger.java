@@ -1,6 +1,7 @@
 package ghostinthecell;
 
 import ghostinthecell.challenge.actions.Action;
+import ghostinthecell.challenge.actions.BombAction;
 import ghostinthecell.custom.BadProducerComparator;
 import ghostinthecell.custom.BestProducerComparator;
 import ghostinthecell.entity.Bomb;
@@ -30,6 +31,7 @@ public class Challenger {
     private List<Troop> opponentTroops = new ArrayList<>();
     private List<Bomb> myBombs = new ArrayList<>();
     private List<Bomb> opponentBombs = new ArrayList<>();
+    private int bombSize;
 
     public TreeSet<Factory> underMyEyes = new TreeSet<>(new BestProducerComparator());
 
@@ -37,6 +39,7 @@ public class Challenger {
         this.entities = entities;
         this.game = game;
         this.gameFactories = gameFactories;
+        this.bombSize = 2;
     }
 
     public List<Action> makeActions() {
@@ -44,9 +47,21 @@ public class Challenger {
         List<Action> actions = new ArrayList<>();
 
         for (Factory myFactory : myFactories) {
+            System.err.println("my factory : " + myFactory.id());
             List<Action> actions_ = myFactory.action(game);
             actions.addAll(actions_);
         }
+
+        if (this.bombSize > 0 && this.myFactories.size() > 0) {
+            for (Factory opponentFactory : this.opponentFactories) {
+                if (opponentFactory.productionSize == 3 && opponentFactory.cyborgsCount > 20 && !opponentFactory.isUnderAttackByBomb()) {
+                    actions.add(new BombAction(opponentFactory.nearFactory(OwnerState.ME), opponentFactory));
+                    this.bombSize--;
+                    break;
+                }
+            }
+        }
+
 
         return actions;
     }
@@ -128,9 +143,11 @@ public class Challenger {
     }
 
     public void addBomb(Bomb bomb) {
+        bomb.matchFactories(entities);
         switch (bomb.owner()) {
             case ME:
                 myBombs.add(bomb);
+                bomb.warnFactory();
                 break;
             case OPPONENT:
                 opponentBombs.add(bomb);

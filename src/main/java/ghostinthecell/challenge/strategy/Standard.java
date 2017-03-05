@@ -2,6 +2,7 @@ package ghostinthecell.challenge.strategy;
 
 import ghostinthecell.Board;
 import ghostinthecell.challenge.actions.Action;
+import ghostinthecell.challenge.actions.Increase;
 import ghostinthecell.challenge.actions.Move;
 import ghostinthecell.challenge.actions.Wait;
 import ghostinthecell.entity.Factory;
@@ -23,49 +24,38 @@ public class Standard extends GameStrategy {
 
         List<Action> actions = new ArrayList<>();
 
-        if (game.me.underMyEyes.size() > 0 && this.factory.hasMoreCyborgsThen(6)) {
-            Iterator<Factory> it = bestTargetSort(game.me.underMyEyes).iterator();
-            while (it.hasNext()) {
-                Factory factory = it.next();
-                if (!factory.isReachable() && factory.productionSize > 0) {
-                    actions.add(new Move(this.factory, factory, factory.necessaryCyborgs()));
-                    if (this.factory.hasMoreCyborgsThen(6)) {
-                        break;
-                    }
-                }
-            }
+        new SafetyFirst(this.factory).processing(game);
+        int totalFactories = game.me.myFactories.size() + game.me.neutralFactories.size() + game.me.opponentFactories.size();
+        if (this.factory.productionSize < 3
+                && this.factory.cyborgsCountMoreOrEqual(10)
+                && game.me.myFactories.size() >= (totalFactories / 3)) {
+            actions.add(new Increase(this.factory));
         }
 
-        if (game.me.neutralFactories.size() > 0 && this.factory.hasMoreCyborgsThen(6)) {
+        boolean done = moveCyborgs(game.me.underMyEyes, actions, true) ||
+                moveCyborgs(game.me.neutralFactories, actions, false) ||
+                moveCyborgs(game.me.opponentFactories, actions, false);
 
-            Iterator<Factory> it = nearbySort(game.me.neutralFactories).iterator();
-            while (it.hasNext()) {
-                Factory factory = it.next();
-                if (!factory.isReachable() && factory.productionSize > 0) {
-                    actions.add(new Move(this.factory, factory, factory.necessaryCyborgs()));
-                    if (this.factory.hasMoreCyborgsThen(6)) {
-                        break;
-                    }
-                }
-            }
-        }
-
-
-        if (game.me.opponentFactories.size() > 0 && this.factory.hasMoreCyborgsThen(6)) {
-            Iterator<Factory> it = nearbySort(game.me.opponentFactories).iterator();
-            while (it.hasNext()) {
-                Factory factory = it.next();
-                if (!factory.isReachable() && factory.productionSize > 0) {
-                    actions.add(new Move(this.factory, factory, factory.necessaryCyborgs()));
-                    if (this.factory.hasMoreCyborgsThen(6)) {
-                        break;
-                    }
-                }
-            }
-            return actions;
-        }
         actions.add(new Wait());
         return actions;
+    }
+
+    private boolean moveCyborgs(TreeSet<Factory> factories, List<Action> actions, boolean useSort) {
+        boolean done = false;
+        if (factories.size() > 0) {
+            Iterator<Factory> it = useSort ? bestTargetSort(factories).iterator() : nearbySort(factories).iterator();
+            while (it.hasNext()) {
+                Factory factory = it.next();
+                int necessaryCyborgs = factory.necessaryCyborgs(this.factory);
+                if (!factory.isReachable() && this.factory.hasMoreCyborgsThen(necessaryCyborgs)) {
+                    actions.add(new Move(this.factory, factory, necessaryCyborgs));
+
+                    done = true;
+                }
+            }
+        }
+
+        return done;
     }
 
     private TreeSet<Factory> bestTargetSort(TreeSet<Factory> underMyEyes) {
@@ -84,7 +74,6 @@ public class Standard extends GameStrategy {
 
                     Integer distanceFromNearOpponentFactory_1 = o1.nextFactories.get(o1.nearFactory(OwnerState.OPPONENT));
                     Integer distanceFromNearOpponentFactory_2 = o2.nextFactories.get(o2.nearFactory(OwnerState.OPPONENT));
-
                     return distanceFromNearOpponentFactory_1 < distanceFromNearOpponentFactory_2 ? 1 : -1;
                 }
 
@@ -107,13 +96,13 @@ public class Standard extends GameStrategy {
             @Override
             public int compare(Factory o1, Factory o2) {
 
-                if (o1.productionSize == o2.productionSize) {
+                //if (o1.productionSize == o2.productionSize) {
                     Integer distance_1 = myFactory.nextFactories.get(o1);
                     Integer distance_2 = myFactory.nextFactories.get(o2);
-                    return distance_1 > distance_2 ? 1 : -1;
-                }
+                    return distance_1 == distance_2 ? 0 : distance_1 > distance_2 ? 1 : -1;
+                //}
 
-                return o1.productionSize < o2.productionSize ? 1 : -1;
+                //return o1.productionSize < o2.productionSize ? 1 : -1;
             }
         };
 

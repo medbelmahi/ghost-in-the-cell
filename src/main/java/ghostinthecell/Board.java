@@ -19,12 +19,12 @@ public class Board {
     public static final int OPPONENT = -1;
     public static final int NEUTRAL = 0;
 
-    Map<Integer, Entity> entities = new HashMap<>();
-    Set<Factory> gameFactories = new HashSet<>();
+    private Map<Integer, Entity> entities = new HashMap<>();
+    private Set<Factory> gameFactories = new HashSet<>();
     public Challenger me;
-    private GraphFindAllPaths<Factory> graph = new GraphFindAllPaths<Factory>();
+    public static GraphFindAllPaths<Factory> graph = new GraphFindAllPaths<Factory>();
 
-    int turn;
+    private int turn;
 
     public Board() {
         this.me = new Challenger(entities, this, gameFactories);
@@ -38,9 +38,15 @@ public class Board {
         firstFactory.addDistance(secondFactory, distance);
         secondFactory.addDistance(firstFactory, distance);
 
-        graph.addNode(firstFactory);
-        graph.addNode(secondFactory);
-        graph.addEdge(firstFactory, secondFactory, distance);
+        addIntoGraph(firstFactory, secondFactory, distance);
+    }
+
+    private void addIntoGraph(Factory firstFactory, Factory secondFactory, int distance) {
+        //if (OwnerState.ME.equals(firstFactory.owner()) && OwnerState.ME.equals(secondFactory.owner())) {
+            graph.addNode(firstFactory);
+            graph.addNode(secondFactory);
+            graph.addEdge(firstFactory, secondFactory, distance);
+        //}
     }
 
     private Factory getFactory(int factoryID) {

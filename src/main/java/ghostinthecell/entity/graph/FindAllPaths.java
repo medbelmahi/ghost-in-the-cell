@@ -5,18 +5,14 @@ package ghostinthecell.entity.graph;
  */
 
 import ghostinthecell.entity.Factory;
+import ghostinthecell.entity.state.OwnerState;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Given a connected directed graph, find all paths between any two input points.
  */
-public class FindAllPaths<T extends Object> {
+public class FindAllPaths<T extends Factory> {
 
     private final GraphFindAllPaths<T> graph;
 
@@ -131,24 +127,26 @@ public class FindAllPaths<T extends Object> {
             totalCost.add(cost);
             path.remove(current);
             return;
-        }
+        } else if (OwnerState.ME.equals(current.owner())) {
 
-        allEdges = graph.edgesFrom(current);
+            allEdges = graph.edgesFrom(current);
 
-        final Set<T> edges = graph.edgesFrom(current).keySet();
+            final Set<T> edges = graph.edgesFrom(current).keySet();
 
-        for (T t : edges) {
-            if (!path.contains(t)) {
-                //System.out.println(t);
-                recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+            for (T t : edges) {
+                if (!path.contains(t)) {
+                    //System.out.println(t);
+                    recursiveWithCost(t, destination, paths, path, totalCost, cost, allEdges);
+                }
             }
         }
+
 
         path.remove(current);
     }
 
 
-    public static void main(String[] args) {
+    /*public static <T extends Object> void main(String[] args) {
         GraphFindAllPaths<String> graphFindAllPaths = new GraphFindAllPaths<String>();
         graphFindAllPaths.addNode("A");
         graphFindAllPaths.addNode("B");
@@ -177,11 +175,29 @@ public class FindAllPaths<T extends Object> {
 
         System.out.println("\nAll possible paths with total distance : ");
         Map<List<String>, Integer> pathWithCost = findAllPaths.getAllPathsWithCost("D", "A");
-        for (Map.Entry<List<String>, Integer> s : pathWithCost.entrySet()) {
+
+        SortedSet<Map.Entry<List<String>, Integer>> sortedPathWithCost = findAllPaths.sortedPathWithCost("D", "A");
+
+        for (Map.Entry<List<String>, Integer> s : sortedPathWithCost) {
             System.out.println(s);
         }
 
         // assertEquals(paths, findAllPaths.getAllPaths("A", "D"));
+    }*/
+
+    public SortedSet<Map.Entry<List<T>, Integer>> sortedPathWithCost(T source, T destination) {
+
+        Map<List<T>, Integer> pathWithCost = getAllPathsWithCost(source, destination);
+
+        Comparator<Map.Entry<List<T>, Integer>> comparator = new Comparator<Map.Entry<List<T>, Integer>>() {
+            @Override
+            public int compare(Map.Entry<List<T>, Integer> entry_1, Map.Entry<List<T>, Integer> entry_2) {
+                return entry_1.getValue() >= entry_2.getValue() ? 1 : -1;
+            }
+        };
+        SortedSet<Map.Entry<List<T>, Integer>> sortedSet = new TreeSet<Map.Entry<List<T>, Integer>>(comparator);
+        sortedSet.addAll(pathWithCost.entrySet());
+        return sortedSet;
     }
 
 

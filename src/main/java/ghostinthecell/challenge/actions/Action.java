@@ -4,6 +4,7 @@ package ghostinthecell.challenge.actions;
  * Created by Mohamed BELMAHI on 25/02/2017.
  */
 public class Action {
+    public static final String SPACE = " ";
 
     private String printedValue;
 

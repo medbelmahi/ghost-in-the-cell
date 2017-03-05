@@ -9,7 +9,7 @@ import ghostinthecell.entity.state.OwnerState;
  * Created by Mohamed BELMAHI on 25/02/2017.
  */
 public abstract class Entity {
-    int cyborgsCount;
+    public int cyborgsCount;
     private OwnerState owner;
     int id;
     int currentTurn;

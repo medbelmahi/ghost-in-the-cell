@@ -1,6 +1,7 @@
 package ghostinthecell.entity;
 
 import ghostinthecell.Challenger;
+import ghostinthecell.entity.state.OwnerState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,10 @@ public class Bomb extends Tripper {
 
     @Override
     public void matchFactories(Map<Integer, Entity> entities) {
-        //this.sourceFactory = (Factory) entities.get(this.source);
-        //this.targetFactory = (Factory) entities.get(this.target);
+        if (OwnerState.ME.equals(this.owner())) {
+            this.sourceFactory = (Factory) entities.get(this.source);
+            this.targetFactory = (Factory) entities.get(this.target);
+        }
     }
 
     @Override
@@ -48,6 +51,14 @@ public class Bomb extends Tripper {
             for (Factory myFactory : myFactories) {
                 myFactory.bomb(this);
             }
+            alreadyWarned = true;
+        }
+    }
+
+    public void warnFactory() {
+        if (!alreadyWarned) {
+            targetFactory.bomb(this);
+            this.warnedFactories.add(targetFactory);
             alreadyWarned = true;
         }
     }
