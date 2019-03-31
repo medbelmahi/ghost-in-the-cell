@@ -11,6 +11,6 @@ public class BestProducerComparator implements Comparator<Factory> {
 
     @Override
     public int compare(Factory f1, Factory f2) {
-        return f1.score() < f2.score() ? 1 : -1;
+        return f1.score() < f2.score() ? 1 : f1.score() != f2.score() ? -1 : 0;
     }
 }

@@ -27,7 +27,7 @@ public class Standard extends GameStrategy {
         new SafetyFirst(this.factory).processing(game);
         int totalFactories = game.me.myFactories.size() + game.me.neutralFactories.size() + game.me.opponentFactories.size();
         if (this.factory.productionSize < 3
-                && this.factory.cyborgsCountMoreOrEqual(10)
+                && this.factory.cyborgsCountMoreOrEqual(15)
                 && game.me.myFactories.size() >= (totalFactories / 3)) {
             actions.add(new Increase(this.factory));
         }

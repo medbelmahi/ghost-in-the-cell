@@ -7,6 +7,30 @@
     <groupId>codingame</groupId>
     <artifactId>ghost-in-the-cell</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.codingame.gameengine/core -->
+        <dependency>
+            <groupId>com.codingame.gameengine</groupId>
+            <artifactId>core</artifactId>
+            <version>3.4.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.codingame.gameengine/runner -->
+        <dependency>
+            <groupId>com.codingame.gameengine</groupId>
+            <artifactId>runner</artifactId>
+            <version>3.4.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.codingame.gameengine/parent -->
+        <dependency>
+            <groupId>com.codingame.gameengine</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.3</version>
+            <type>pom</type>
+        </dependency>
+
+    </dependencies>
     <build>
         <plugins>
             <plugin>
