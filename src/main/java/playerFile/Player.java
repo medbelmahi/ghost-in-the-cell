@@ -1006,10 +1006,12 @@ class Player {
         Scanner in = new Scanner(System.in);
         int factoryCount = in.nextInt(); // the number of factories
         int linkCount = in.nextInt(); // the number of links between factories
+        System.err.println("factoryCount : " + factoryCount);
         for (int i = 0; i < linkCount; i++) {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
+            System.err.println(i + " : " + factory1 + " -> " + factory2 + " => " + distance);
             gameBoard.writeDistance(factory1, factory2, distance);
         }
 
@@ -1215,14 +1217,6 @@ class Move extends Action {
     public String writeAction() {
         return super.writeAction() + SPACE + this.source.id() + SPACE + this.destination.id() + SPACE + this.cyborgCount;
     }
-}
-
-
-/**
- * Created by Mohamed BELMAHI on 28/02/2017.
- */
-class Request {
-
 }
 
 
@@ -1443,17 +1437,6 @@ class UnderAttackByBomb extends GameStrategy {
             }
         }
     }
-}
-
-
-
-
-/**
- * Created by Mohamed BELMAHI on 04/03/2017.
- */
-class Plan {
-    List<Action> actions = new ArrayList<>();
-    List<Request> requests = new ArrayList<>();
 }
 
 

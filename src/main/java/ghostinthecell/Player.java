@@ -17,10 +17,12 @@ public class Player {
         Scanner in = new Scanner(System.in);
         int factoryCount = in.nextInt(); // the number of factories
         int linkCount = in.nextInt(); // the number of links between factories
+        System.err.println("factoryCount : " + factoryCount);
         for (int i = 0; i < linkCount; i++) {
             int factory1 = in.nextInt();
             int factory2 = in.nextInt();
             int distance = in.nextInt();
+            System.err.println(i + " : " + factory1 + " -> " + factory2 + " => " + distance);
             gameBoard.writeDistance(factory1, factory2, distance);
         }
 
